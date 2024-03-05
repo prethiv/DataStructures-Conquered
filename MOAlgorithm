@@ -1,0 +1,99 @@
+ckage march_2024;
+
+import java.util.ArrayList;
+
+class Chunk{
+    int chunksize;
+    int[] elements;
+    int answer;
+
+    int start,end;
+
+    Chunk(int size,int[] keys,int answer,int start,int end){
+        this.chunksize = size;
+        this.answer = answer;
+        this.elements = keys;
+        this.start = start;
+        this.end = end;
+    }
+
+}
+
+class Query{
+    int left,right;
+    Query(int left,int right){
+        this.left = left;
+        this.right = right;
+    }
+}
+public class MOAlgorithm {
+
+    void printQuerySums(int[] a,int n,ArrayList<Query> queries,int m){
+        int limit = (int) Math.sqrt(n);
+        Chunk[] chunks = new Chunk[limit];
+        int start=0;
+        for(int i=0;i<limit;i++){
+            int si = start;
+            int ei = start+limit;
+            int end = start+limit;
+            int answer = 0;
+            int[] temp =new int[end-start];
+            int ind =0;
+            while(start<end&&start<a.length){
+                temp[ind++]=a[start];
+                answer+=a[start++];
+            }
+            chunks[i]=new Chunk(limit,temp,answer,si,ei-1);
+            start=end;
+        }
+        for(int i=0;i<m;i++){
+            int L = queries.get(i).left;
+            int R = queries.get(i).right;
+            int leftchunk = L/limit;
+            int rightchunk = R/limit;
+            int sum = 0;
+            while(leftchunk<=rightchunk){
+                int blockstart = chunks[leftchunk].start;
+                int blockend = chunks[leftchunk].end;
+                if(blockstart>=L&&blockend<=R) {
+                    sum += chunks[leftchunk].answer;
+                }
+                else if(R<blockend){
+                    int yind = 0;
+                    int[] temp = chunks[leftchunk].elements;
+                    for(int y =blockstart;y<=R;y++){
+                        sum+= temp[yind++];
+                    }
+                }
+                else if(L>blockstart){
+
+                    int[] temp = chunks[leftchunk].elements;
+                    int yind = chunks[leftchunk].elements.length-1;
+                    for(int y =L;y<=blockend;y++){
+                        sum+= temp[yind--];
+                    }
+                }
+                leftchunk++;
+            }
+            System.out.println(sum);
+        }
+        System.out.println("Dummy");
+    }
+
+    public static void main(String[] args) {
+        int a[] = {1, 1, 2, 1, 3, 4, 5, 2, 8};
+        int n = a.length;
+
+        ArrayList<Query> q = new ArrayList<Query>();
+        q.add(new Query(0,4));
+        q.add(new Query(1,3));
+        q.add(new Query(4,7));
+        q.add(new Query(6,8));
+        q.add(new Query(0,8));
+
+
+        int m = q.size();
+        new MOAlgorithm().printQuerySums(a, n, q, m);
+    }
+
+}
